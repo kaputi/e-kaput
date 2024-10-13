@@ -81,7 +81,9 @@ ekaput.openFloatingWindow = function()
   end
 
   if float_open == 0 then
-    local lineDiagnostics = vim.lsp.diagnostic.get_line_diagnostics()
+    local lineNum = vim.api.nvim_win_get_cursor(0)[1] - 1
+    local lineDiagnostics = vim.diagnostic.get(0,
+      { severity = { min = vim.diagnostic.severity.HINT }, lnum = lineNum })
 
     local hasDiagnostics = not utils.tableIsEmpty(lineDiagnostics)
 
@@ -89,6 +91,10 @@ ekaput.openFloatingWindow = function()
       local errors = utils.formatErrors(lineDiagnostics, config)
 
       local errorBuffer = utils.errorBuffer(errors)
+
+      if errorBuffer == nil then
+        return
+      end
 
       local errorWindow = utils.createErrorWindow(errorBuffer, config)
 
@@ -104,8 +110,12 @@ ekaput.closeFloatingWindow = function()
   -- vim_vs_lua()
   -- if config.enabled == nil or config.enabled == false then return end
   if float_open == 1 then
-    vim.api.nvim_win_close(window, true)
-    vim.api.nvim_buf_delete(buffer, { force = true })
+    if vim.api.nvim_win_is_valid(window) then
+      vim.api.nvim_win_close(window, true)
+    end
+    if vim.api.nvim_buf_is_valid(buffer) then
+      vim.api.nvim_buf_delete(buffer, { force = true })
+    end
     float_open = 0
   end
 end
