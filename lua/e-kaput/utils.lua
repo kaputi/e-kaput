@@ -108,6 +108,10 @@ utils.errorBuffer = function(errors)
   severityHighlight[3] = 'EKaputInformation'
   severityHighlight[4] = 'EKaputHint'
 
+  if next(errors) == nil then
+    return nil
+  end
+
   for key, value in ipairs(errors) do
     local message = value['message']
 
